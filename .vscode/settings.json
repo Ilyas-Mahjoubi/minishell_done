@@ -1,0 +1,12 @@
+{
+	"files.associations": {
+		"minishell.h": "c"
+	},
+	"github.copilot.enable": {
+		"*": false,
+		"plaintext": false,
+		"markdown": false,
+		"scminput": false,
+		"c": true
+	}
+}
