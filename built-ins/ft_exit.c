@@ -6,7 +6,7 @@
 /*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/02 18:23:50 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/08 16:11:03 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/13 18:10:38 by tkurukul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int		is_num(char *str)
 	return (0);
 }
 
-void	ft_exit(char **args)
+void	ft_exit(char **args, t_info *info)
 {
 	ft_printf(1, "exit\n");
 	if (args[1])
@@ -37,6 +37,7 @@ void	ft_exit(char **args)
 		if (is_num(args[1]) == -1 && !args[2])
 		{
 			ft_printf(2, "Minishell: exit: %s: numeric argument required\n", args[1]);
+			free_all(info);
 			exit(255);
 		}
 		if (args[2])
@@ -46,5 +47,6 @@ void	ft_exit(char **args)
 		}
 		exit_status = ft_atoi(args[1]);
 	}
+	free_all(info);
 	exit(exit_status);
 }

@@ -6,7 +6,7 @@
 /*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 20:19:42 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/12 18:31:19 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/13 21:14:11 by tkurukul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void	save_command(t_info *info, t_token **token)
 	save_redirections(info, (*token));
 	if (i == 0)
 	{
-		while ((*token))
+		while ((*token) && (*token)->type != 1)
 			(*token) = (*token)->next;
 		return ;
 	}
@@ -157,6 +157,7 @@ void	form_main(t_token *token, t_info *info)
 			tmp = tmp->next;
 		}
 	}
+	printf("size: %d", size);
 	matrix = malloc((size + 1) * sizeof(char**));
 	if (!matrix)
 		return ;

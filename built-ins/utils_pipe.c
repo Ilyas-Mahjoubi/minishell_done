@@ -6,7 +6,7 @@
 /*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 18:37:00 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/09 16:44:42 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/13 18:09:47 by tkurukul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,13 @@ int	in_out_1(int pipefd[2])
 
 void	close_fd(int *ar)
 {
-	if (ar[0] >= 0)
-		close(ar[0]);
-	if (ar[1] >= 0)
-		close(ar[1]);
+	if (ar)
+	{
+		if (ar[0] >= 0)
+			close(ar[0]);
+		if (ar[1] >= 0)
+			close(ar[1]);
+	}
 }
 
 void	failure(int fd[2])
@@ -37,10 +40,9 @@ void	failure(int fd[2])
 	estat(1);
 	ft_printf(2, "minishell: execve failed!\n");
 }
-void	failure_command(int fd[2], char **matrix, char **str)
+void	failure_command(int fd[2], char **str)
 {
 	ft_printf(2, "minishell: %s: command not found\n", (*str));
-	free_mat(matrix);
 	estat(127);
 	close_fd(fd);
 }

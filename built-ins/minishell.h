@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
+/*   ilyas.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/21 18:09:42 by ilmahjou          #+#    #+#             */
-/*   Updated: 2025/05/12 18:46:19 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/13 21:38:40 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ typedef struct s_info {
 	char	**tmp;
 	int		size;
 	int		flag_ri;
+	int		fd_in_out[2];
 } t_info;
 
 
@@ -82,24 +83,25 @@ void	ft_export(t_info *info, char **args);
 void	ft_env(t_info *info);
 void	ft_cd(char **args, t_info *info);
 void	ft_echo(char **args);
-void	ft_exit(char **args);
+void  ft_exit(char **args, t_info *info);
 
 // redirections
 int	ft_input(char **exec);
 int	ft_output(char **exec);
 int	ft_append(char **exec);
-int		ft_heredoc(char **exec);
+int	ft_heredoc(char **exec, t_info *info);
 
 
 // dollar
-char	*dollarfull(char *str, t_info *info);
-int	arg_execve(char ***command, t_info *info);
+/* char	*dollarfull(char *str, t_info *info);
+int	arg_execve(char ***command, t_info *info); */
+
 
 // pipe and proccess
 void	ft_execution(t_info *info);
 void	close_fd(int *ar);
 void		failure(int fd[2]);
-void		failure_command(int fd[2], char **matrix, char **str);
+void		failure_command(int fd[2], char **str);
 char	*abs_path(char *command, t_info *info);
 char	*build_full(char *path, char *command);
 char	**find_path(char **envp);
@@ -120,13 +122,14 @@ void	form_main(t_token *token, t_info *info);
 void ft_listadd_back(t_token **lst, t_token *new);
 t_token *ft_newnode(char *content, t_token_type type);
 char	*ft_strncpy(char *dest, char *src, unsigned int n);
-void	ft_refresh_fd(int fd_in, int fd_out);
+void	ft_refresh_fd(t_info *info);
 
 
 int is_builtin(char **matrix);
 
 // free
 void	free3(char ***matrix);
+void  free_all(t_info *info);
 //parssing
 char	*mdollar(char *str, t_info *info);
 t_token	*free_tokens(t_token *head);
@@ -138,5 +141,17 @@ t_token	*add_double_quote_text(char *input, int start, int end, t_token *head, t
 t_token	*process_double_quotes(char *input, int *i, t_token *head, t_token *current, t_info *info);
 t_token	*handle_quotes(char *input, int *i, t_token *head, t_token *current, t_info *info);
 int		validate_syntax(t_token *tokens);
+t_token *join_word_segment(char *segment, t_token *head, t_token **current_word_token);
+char *token_type_to_string(t_token_type token_type);
+////try//
+t_token *expand_and_tokenize_var(char *var_value, t_info *info);
+t_token *tokenize_string(char *str, t_info *info);
+t_token	*handle_redirection(char *input, int *i, t_token *head, t_token *current);
+char *extract_single_quote_content(char *input, int *i);
+char *extract_word_segment(char *input, int *i);
+char *extract_double_quote_content(char *input, int *i, t_info *info);
+t_token	*handle_pipe(int *i, t_token *head, t_token *current);
+
+
 
 #endif

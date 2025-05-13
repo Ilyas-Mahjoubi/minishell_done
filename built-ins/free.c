@@ -6,7 +6,7 @@
 /*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/05 01:31:10 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/09 22:46:03 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/13 18:07:55 by tkurukul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,4 +25,11 @@ void	free3(char ***matrix)
 		i++;
 	}
 	free(matrix);
+}
+
+void	free_all(t_info *info)
+{
+	free3(info->exec);
+	free_mat(info->env);
+	close_fd(info->fd_in_out);
 }

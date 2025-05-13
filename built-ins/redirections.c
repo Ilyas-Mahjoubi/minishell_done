@@ -6,7 +6,7 @@
 /*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 22:04:01 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/09 19:27:57 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/13 21:04:33 by tkurukul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ int	ft_append(char **exec)
 	return (0);
 }
 
-void	ft_heredoc_process(char **exec, int pipefd[2])
+void	ft_heredoc_process(char **exec, int pipefd[2], t_info *info)
 {
 	char	*str;
 	int		i;
@@ -75,6 +75,7 @@ void	ft_heredoc_process(char **exec, int pipefd[2])
 			if (!str)
 				ft_printf(2, "Minishell: warning: here-document delimited by end-of-file (wanted %s)\n", exec[1]);
 			free(str);
+			free_all(info);
 			close(pipefd[1]);
 			exit(0);
 		}
@@ -107,7 +108,7 @@ int	ft_heredoc_parent(int pid, int pipeh[2], int *status)
 	return (estat(0), 0);
 }
 
-int		ft_heredoc(char **exec)
+int		ft_heredoc(char **exec, t_info *info)
 {
 	int		status;
 	int		pipeh[2];
@@ -120,10 +121,12 @@ int		ft_heredoc(char **exec)
 		return (-1);
 	if (pid == 0)
 	{
+		if (dup2(info->fd_in_out[0], STDIN_FILENO) == -1)
+			return (-1);
 		close(pipeh[0]);
-		signal(SIGINT, SIG_IGN);
+		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_IGN);
-		ft_heredoc_process(exec, pipeh);
+		ft_heredoc_process(exec, pipeh, info);
 	}
 	else
 	{

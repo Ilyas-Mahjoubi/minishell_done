@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_execution.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 18:29:40 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/12 18:50:43 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/13 21:09:01 by tkurukul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,17 +40,19 @@ void	one_exec(char **command, t_info *info, int fd[2])
 	str = abs_path(command[0], info);
 	if (!str)
 	{
-		failure_command(fd, command, &command[0]);
+		failure_command(fd, command);
+		free_all(info);
 		exit (exit_status);
 	}
 	execve(str, command, info->env);
 	failure(fd);
+	close_fd(info->fd_in_out);
 	free3(info->exec);
 	free(str);
 	exit (126);
 }
 
-int	ft_redirections(char **matrix)
+int	ft_redirections(char **matrix, t_info *info)
 {
 	int	result;
 
@@ -62,7 +64,7 @@ int	ft_redirections(char **matrix)
 	else if (ft_strcmp(matrix[0],">>") == 0)
 		result = ft_append(matrix);
 	else if (ft_strcmp(matrix[0],"<<") == 0)
-		result = ft_heredoc(matrix);
+		result = ft_heredoc(matrix, info);
 	if (result == -1)
 		return (-1);
 	return (0);
@@ -108,7 +110,7 @@ void exec_builtin(char **matrix, t_info *info)
 	else if (ft_strcmp(matrix[0], "echo") == 0)
 		ft_echo(matrix);
 	else if (ft_strcmp(matrix[0], "exit") == 0)
-		ft_exit(matrix);
+		ft_exit(matrix, info);
 }
 
 int	istt_builtin(char ***matrix, t_info *info)
@@ -119,27 +121,34 @@ int	istt_builtin(char ***matrix, t_info *info)
 	i = 0;
 	mat = 0;
 	while(is_redirection(matrix[mat]))
-	{
-		ft_redirections(info->exec[mat]);
 		mat++;
+	if (is_builtin(matrix[mat]) == 1)
+	{
+		mat = 0;
+		while(is_redirection(matrix[mat]))
+		{
+			ft_redirections(info->exec[mat], info);
+			mat++;
+		}
+		if (ft_strcmp(matrix[mat][0], "cd") == 0)
+			ft_cd(matrix[mat], info);
+		else if (ft_strcmp(matrix[mat][0], "pwd") == 0)
+			print_pwd();
+		else if (ft_strcmp(matrix[mat][0], "unset") == 0)
+			ft_unset(info, matrix[mat]);
+		else if (ft_strcmp(matrix[mat][0], "export") == 0)
+			ft_export(info, matrix[mat]);
+		else if (ft_strcmp(matrix[mat][0], "env") == 0)
+			ft_env(info);
+		else if (ft_strcmp(matrix[mat][0], "echo") == 0)
+			ft_echo(matrix[mat]);
+		else if (ft_strcmp(matrix[mat][0], "exit") == 0)
+			ft_exit(matrix[mat], info);
+		else
+			i = -1;
 	}
-	i = 0;
-	if (ft_strcmp(matrix[mat][0], "cd") == 0)
-		ft_cd(matrix[mat], info);
-	else if (ft_strcmp(matrix[mat][0], "pwd") == 0)
-		print_pwd();
-	else if (ft_strcmp(matrix[mat][0], "unset") == 0)
-		ft_unset(info, matrix[mat]);
-	else if (ft_strcmp(matrix[mat][0], "export") == 0)
-		ft_export(info, matrix[mat]);
-	else if (ft_strcmp(matrix[mat][0], "env") == 0)
-		ft_env(info);
-	else if (ft_strcmp(matrix[mat][0], "echo") == 0)
-		ft_echo(matrix[mat]);
-	else if (ft_strcmp(matrix[mat][0], "exit") == 0)
-		ft_exit(matrix[mat]);
 	else
-		i = -1;
+			i = -1;
 	return (i);
 }
 
@@ -148,7 +157,7 @@ int	is_only_redirection(char ***matrix)
 	int	i;
 
 	i = 0;
-	while (matrix[i])
+	while (matrix[i] && matrix[i][0][0] != '|')
 	{
 		if (!(matrix[i][0]) ||
 			!(ft_strcmp(matrix[i][0], "<") == 0 ||
@@ -161,32 +170,60 @@ int	is_only_redirection(char ***matrix)
 	return (0);
 }
 
+int	count_exec_blocks(char ***exec)
+{
+	int	i = 0;
+	int	count = 0;
+	int	has_cmd_or_redir = 0;
+
+	while (exec[i])
+	{
+		if (!exec[i][0])
+		{
+			i++;
+			continue;
+		}
+		if (exec[i][0][0] == '|')
+		{
+			if (has_cmd_or_redir)
+				count++;
+			has_cmd_or_redir = 0;
+		}
+		else if (ft_isalpha(exec[i][0][0]) || is_redirection(exec[i]))
+		{
+			has_cmd_or_redir = 1;
+		}
+		i++;
+	}
+	if (has_cmd_or_redir)
+		count++;
+	return (count);
+}
 
 
 void	ft_execution(t_info *info)
 {
-	int	fd_in;
-	int	fd_out;
+
 	int	i;
+	int	j;
 	int	mat;
 	int	count;
 	int	cpipe[2];
 	int	prevpipe;
 	pid_t	pid;
+	pid_t	pids[64];
+	int	pid_counts;
 	int		status;
 
 	i = 0;
-	fd_in = dup(STDIN_FILENO);
-	fd_out = dup(STDOUT_FILENO);
-	count = 0;
+	cpipe[0] = -1;
+	cpipe[1] = -1;
+	info->fd_in_out[0] = dup(STDIN_FILENO);
+	info->fd_in_out[1] = dup(STDOUT_FILENO);
+	count = count_exec_blocks(info->exec);
+	printf("count : %d\n", count);
+	pid_counts = 0;
 	prevpipe = -42;
-	while (info->exec[i])
-	{
-		if (ft_isalpha(info->exec[i][0][0]) == 1 || is_redirection(info->exec[i]))
-			count++;
-		i++;
-	}
-	i = 0;
 	mat = 0;
 	while (i < count)
 	{
@@ -194,17 +231,16 @@ void	ft_execution(t_info *info)
 		{
 			while(info->exec[mat])
 			{
-				ft_redirections(info->exec[mat]);
+				ft_redirections(info->exec[mat], info);
 				mat++;
 			}
-			ft_refresh_fd(fd_in, fd_out);
 			break;
 		}
 		if (count == 1)
 		{
 			if (istt_builtin(info->exec, info) != -1)
 			{
-				ft_refresh_fd(fd_in, fd_out);
+				ft_refresh_fd(info);
 				break;
 			}
 		}
@@ -241,8 +277,8 @@ void	ft_execution(t_info *info)
 			}
 			while (is_redirection(info->exec[mat]))
 			{
-				if (ft_redirections(info->exec[mat]) == -1)
-					return (exit(1));
+				if (ft_redirections(info->exec[mat], info) == -1)
+					exit(1);
 				mat++;
 			}
 			if (!info->exec[mat])
@@ -250,6 +286,7 @@ void	ft_execution(t_info *info)
 			if (is_builtin(info->exec[mat]))
 			{
 				exec_builtin(info->exec[mat], info);
+				free_all(info);
 				exit(0);
 			}
 			else
@@ -257,6 +294,7 @@ void	ft_execution(t_info *info)
 		}
 		else
 		{
+			pids[pid_counts++] = pid;
 			while (info->exec[mat])
 			{
 				if (info->exec[mat][0][0] == '|')
@@ -273,23 +311,27 @@ void	ft_execution(t_info *info)
 				close(cpipe[1]);
 				prevpipe = cpipe[0];
 			}
-			if (waitpid(pid, &status, 0) == -1)
-			{
-				ft_printf(2, "Minishell: error waitpid\n");
-				free3(info->exec);
-				exit(1);
-			}
-			if (WIFEXITED(status))
-				exit_status = WEXITSTATUS(status);
-			else if (WIFSIGNALED(status))
-				exit_status = 128 + WTERMSIG(status);
 		}
 		i++;
 	}
+	j = 0;
+	while (j < pid_counts)
+	{
+		if (waitpid(pids[j], &status, 0) == -1)
+		{
+			ft_printf(2, "Minishell: error waitpid\n");
+			free3(info->exec);
+			exit(1);
+		}
+		if (WIFEXITED(status))
+			exit_status = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			exit_status = 128 + WTERMSIG(status);
+		j++;
+	}
+	ft_refresh_fd(info);
 	free3(info->exec);
-	ft_refresh_fd(fd_in, fd_out);
-	close(fd_in);
-	close(fd_out);
+	close_fd(info->fd_in_out);
 }
 
 

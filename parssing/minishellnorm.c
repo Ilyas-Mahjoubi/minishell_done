@@ -6,13 +6,13 @@
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 16:22:23 by ilmahjou          #+#    #+#             */
-/*   Updated: 2025/05/12 18:57:53 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/13 18:20:48 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../built-ins/minishell.h"
 
-static t_token	*handle_pipe(int *i, t_token *head, t_token *current)
+t_token	*handle_pipe(int *i, t_token *head, t_token *current)
 {
 	t_token	*new_token;
 
@@ -27,7 +27,7 @@ static t_token	*handle_pipe(int *i, t_token *head, t_token *current)
 	return (head);
 }
 
-static t_token	*handle_redirection(char *input, int *i, t_token *head, t_token *current)
+t_token	*handle_redirection(char *input, int *i, t_token *head, t_token *current)
 {
 	t_token	*new_token;
 
@@ -107,7 +107,7 @@ t_token *join_word_segment(char *segment, t_token *head, t_token **current_word_
 }
 
 // Modified handle_word to extract word segment
-static char *extract_word_segment(char *input, int *i)
+char *extract_word_segment(char *input, int *i)
 {
 	int start;
 	//char *word;
@@ -122,7 +122,7 @@ static char *extract_word_segment(char *input, int *i)
 }
 
 // Modified handle_single_quotes to return string content
-static char *extract_single_quote_content(char *input, int *i)
+char *extract_single_quote_content(char *input, int *i)
 {
 	int content_start = *i + 1; // Skip the opening quote
 	char quote_char = input[*i];
@@ -377,8 +377,8 @@ int main(int ac, char **av, char **env)
 					i++;
 					fflush(stdout);
 				}
-				ft_execution(&info);
 				free_tokens(token);  // Use your token free function
+				ft_execution(&info);
 			}
 		}
 		free(line);  // Free the line after processing
