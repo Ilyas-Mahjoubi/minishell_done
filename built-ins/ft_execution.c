@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_execution.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 18:29:40 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/13 21:09:01 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/13 22:04:02 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ void exec_builtin(char **matrix, t_info *info)
 	else if (ft_strcmp(matrix[0], "export") == 0)
 		ft_export(info, matrix);
 	else if (ft_strcmp(matrix[0], "env") == 0)
-		ft_env(info);
+		ft_env(matrix, info);
 	else if (ft_strcmp(matrix[0], "echo") == 0)
 		ft_echo(matrix);
 	else if (ft_strcmp(matrix[0], "exit") == 0)
@@ -139,7 +139,7 @@ int	istt_builtin(char ***matrix, t_info *info)
 		else if (ft_strcmp(matrix[mat][0], "export") == 0)
 			ft_export(info, matrix[mat]);
 		else if (ft_strcmp(matrix[mat][0], "env") == 0)
-			ft_env(info);
+			ft_env(matrix[mat], info);
 		else if (ft_strcmp(matrix[mat][0], "echo") == 0)
 			ft_echo(matrix[mat]);
 		else if (ft_strcmp(matrix[mat][0], "exit") == 0)

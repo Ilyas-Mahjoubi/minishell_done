@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ilyas.h                                            :+:      :+:    :+:   */
+/*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/21 18:09:42 by ilmahjou          #+#    #+#             */
-/*   Updated: 2025/05/13 21:38:40 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/13 22:04:30 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void	form_env(char **env, t_info	*info);
 void	print_pwd(void);
 void	ft_unset(t_info *info, char **args);
 void	ft_export(t_info *info, char **args);
-void	ft_env(t_info *info);
+void	ft_env(char **matrix, t_info *info);
 void	ft_cd(char **args, t_info *info);
 void	ft_echo(char **args);
 void  ft_exit(char **args, t_info *info);

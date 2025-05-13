@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_env.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/21 19:48:49 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/08 16:13:02 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/13 22:03:17 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,16 @@ void	form_env(char **env, t_info	*info)
 	info->env[count] = NULL;
 }
 
-void	ft_env(t_info *info)
+void	ft_env(char **matrix, t_info *info)
 {
 	int	i;
 
 	i = 0;
+	if (matrix[1])
+	{
+		ft_printf(2, "Minishell: env: '%s': No such file or directory\n", matrix[1]);
+		return ;
+	}
 	while (info->env[i])
 	{
 		ft_printf(STDOUT_FILENO, "%s\n", info->env[i]);
