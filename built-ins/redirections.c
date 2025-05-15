@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirections.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 22:04:01 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/13 21:04:33 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/15 20:43:47 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,10 @@ int	ft_input(char **exec)
 
 	fd = open(exec[1], O_RDONLY);
 	if (fd == -1)
+	{
+		ft_printf(2., "Minishell : %s: %s\n", exec[1], strerror(errno));
 		return (estat(126), -1);
+	}
 	if(dup2(fd, 0) == -1)
 	{
 		ft_printf(2, "Minishell: failed dup\n");
@@ -36,7 +39,10 @@ int	ft_output(char **exec)
 
 	fd = open(exec[1], O_WRONLY | O_CREAT| O_TRUNC, 0644);
 	if (fd == -1)
-		return (estat(1), -1);
+	{
+		ft_printf(2., "Minishell : %s: %s\n", exec[1], strerror(errno));
+		return (estat(126), -1);
+	}
 	if(dup2(fd, 1) == -1)
 	{
 		ft_printf(2, "Minishell: failed dup\n");
@@ -52,7 +58,10 @@ int	ft_append(char **exec)
 
 	fd = open(exec[1], O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd == -1)
-		return (-1);
+	{
+		ft_printf(2., "Minishell : %s: %s\n", exec[1], strerror(errno));
+		return (estat(126), -1);
+	}
 	if(dup2(fd, 1) == -1)
 	{
 		ft_printf(2, "Minishell: failed dup\n");

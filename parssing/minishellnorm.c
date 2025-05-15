@@ -6,7 +6,7 @@
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 16:22:23 by ilmahjou          #+#    #+#             */
-/*   Updated: 2025/05/13 18:20:48 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/15 21:51:50 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,19 +67,15 @@ t_token	*handle_redirection(char *input, int *i, t_token *head, t_token *current
 	return (head);
 }
 
-// New function to join adjacent segments into one word
-t_token *join_word_segment(char *segment, t_token *head, t_token **current_word_token)
+t_token *join_word_segment(char *segment, t_token *head, t_token **current_word_token, t_token_type type)
 {
-	char *new_content;
-	t_token *new_token;
-
 	if (!segment)
 		return (free_tokens(head));
 
 	if (*current_word_token == NULL)
 	{
-		// No current word being built, create a new token
-		new_token = creat_token(segment, TOKEN_WORD);
+		// Create a new token with the specified type
+		t_token *new_token = creat_token(segment, type);  // Pass the type here
 		free(segment);
 		if (!new_token)
 			return (free_tokens(head));
@@ -93,8 +89,8 @@ t_token *join_word_segment(char *segment, t_token *head, t_token **current_word_
 	}
 	else
 	{
-		// Append to existing word token
-		new_content = ft_strjoin((*current_word_token)->content, segment);
+		// Append to existing token (keep its original type)
+		char *new_content = ft_strjoin((*current_word_token)->content, segment);
 		free(segment);
 		if (!new_content)
 			return (free_tokens(head));
@@ -102,7 +98,6 @@ t_token *join_word_segment(char *segment, t_token *head, t_token **current_word_
 		free((*current_word_token)->content);
 		(*current_word_token)->content = new_content;
 	}
-
 	return (head);
 }
 
@@ -147,117 +142,117 @@ char *extract_single_quote_content(char *input, int *i)
 
 char *extract_double_quote_content(char *input, int *i, t_info *info)
 {
-    int     content_start = *i + 1; // Skip the opening quote
-    char    quote_char = '"';
-    char    *full_segment = NULL;
-    //size_t  segment_len = 0;
+	int     content_start = *i + 1; // Skip the opening quote
+	char    quote_char = '"';
+	char    *full_segment = NULL;
+	//size_t  segment_len = 0;
 
-    (*i)++; // Skip the opening quote
+	(*i)++; // Skip the opening quote
 
-    // Collect all characters within quotes
-    while (input[*i] && input[*i] != quote_char)
-    {
-        if (input[*i] == '$' &&
-            (ft_isalnum(input[*i + 1]) || input[*i + 1] == '_' || input[*i + 1] == '?'))
-        {
-            // Add text before variable
-            if (*i > content_start)
-            {
-                char *pre_var_segment = ft_substr(input, content_start, *i - content_start);
-                if (!pre_var_segment)
-                {
-                    free(full_segment);
-                    return NULL;
-                }
+	// Collect all characters within quotes
+	while (input[*i] && input[*i] != quote_char)
+	{
+		if (input[*i] == '$' &&
+			(ft_isalnum(input[*i + 1]) || input[*i + 1] == '_' || input[*i + 1] == '?'))
+		{
+			// Add text before variable
+			if (*i > content_start)
+			{
+				char *pre_var_segment = ft_substr(input, content_start, *i - content_start);
+				if (!pre_var_segment)
+				{
+					free(full_segment);
+					return NULL;
+				}
 
-                // Dynamically reallocate full_segment
-                char *temp = full_segment
-                    ? ft_strjoin(full_segment, pre_var_segment)
-                    : ft_strdup(pre_var_segment);
+				// Dynamically reallocate full_segment
+				char *temp = full_segment
+					? ft_strjoin(full_segment, pre_var_segment)
+					: ft_strdup(pre_var_segment);
 
-                free(full_segment);
-                free(pre_var_segment);
-                full_segment = temp;
+				free(full_segment);
+				free(pre_var_segment);
+				full_segment = temp;
 
-                if (!full_segment)
-                    return NULL;
-            }
+				if (!full_segment)
+					return NULL;
+			}
 
-            // Process environment variable
-            char *var_value = NULL;
-            int var_start = *i + 1;
+			// Process environment variable
+			char *var_value = NULL;
+			int var_start = *i + 1;
 
-            // Handle $? special case
-            if (input[var_start] == '?')
-            {
-                var_value = mdollar("?", info);
-                *i += 2;
-            }
-            else
-            {
-                // Find end of variable name
-                while (input[*i] && (ft_isalnum(input[*i + 1]) || input[*i + 1] == '_'))
-                    (*i)++;
+			// Handle $? special case
+			if (input[var_start] == '?')
+			{
+				var_value = mdollar("?", info);
+				*i += 2;
+			}
+			else
+			{
+				// Find end of variable name
+				while (input[*i] && (ft_isalnum(input[*i + 1]) || input[*i + 1] == '_'))
+					(*i)++;
 
-                char *var_name = ft_substr(input, var_start, *i - var_start + 1);
-                var_value = mdollar(var_name, info);
-                free(var_name);
-                (*i)++;
-            }
+				char *var_name = ft_substr(input, var_start, *i - var_start + 1);
+				var_value = mdollar(var_name, info);
+				free(var_name);
+				(*i)++;
+			}
 
-            // Add variable value to full_segment
-            if (var_value)
-            {
-                char *temp = full_segment
-                    ? ft_strjoin(full_segment, var_value)
-                    : ft_strdup(var_value);
+			// Add variable value to full_segment
+			if (var_value)
+			{
+				char *temp = full_segment
+					? ft_strjoin(full_segment, var_value)
+					: ft_strdup(var_value);
 
-                free(full_segment);
-                free(var_value);
-                full_segment = temp;
+				free(full_segment);
+				free(var_value);
+				full_segment = temp;
 
-                if (!full_segment)
-                    return NULL;
-            }
+				if (!full_segment)
+					return NULL;
+			}
 
-            content_start = *i;
-        }
-        else
-            (*i)++;
-    }
+			content_start = *i;
+		}
+		else
+			(*i)++;
+	}
 
-    // Add any remaining text
-    if (*i > content_start)
-    {
-        char *final_segment = ft_substr(input, content_start, *i - content_start);
-        if (!final_segment)
-        {
-            free(full_segment);
-            return NULL;
-        }
+	// Add any remaining text
+	if (*i > content_start)
+	{
+		char *final_segment = ft_substr(input, content_start, *i - content_start);
+		if (!final_segment)
+		{
+			free(full_segment);
+			return NULL;
+		}
 
-        char *temp = full_segment
-            ? ft_strjoin(full_segment, final_segment)
-            : ft_strdup(final_segment);
+		char *temp = full_segment
+			? ft_strjoin(full_segment, final_segment)
+			: ft_strdup(final_segment);
 
-        free(full_segment);
-        free(final_segment);
-        full_segment = temp;
+		free(full_segment);
+		free(final_segment);
+		full_segment = temp;
 
-        if (!full_segment)
-            return NULL;
-    }
+		if (!full_segment)
+			return NULL;
+	}
 
-    if (!input[*i]) // No closing quote found
-    {
-        free(full_segment);
-        return NULL;
-    }
+	if (!input[*i]) // No closing quote found
+	{
+		free(full_segment);
+		return NULL;
+	}
 
-    (*i)++; // Skip the closing quote
+	(*i)++; // Skip the closing quote
 
-    // If no segment was created, return empty string
-    return full_segment ? full_segment : ft_strdup("");
+	// If no segment was created, return empty string
+	return full_segment ? full_segment : ft_strdup("");
 }
 
 t_token *tokenize_input(char *input, t_info *info)
@@ -288,15 +283,17 @@ t_token *tokenize_input(char *input, t_info *info)
 		{
 			segment = extract_single_quote_content(input, &i);
 			if (!segment)
-				return (free_tokens(head)); // Return NULL after freeing tokens
-			head = join_word_segment(segment, head, &current_word_token);
+				return (free_tokens(head));
+			// Pass TOKEN_SQUOTE for single-quoted segments
+			head = join_word_segment(segment, head, &current_word_token, TOKEN_SQUOTE);
 		}
 		else if (input[i] == '"') // Double quotes
 		{
 			segment = extract_double_quote_content(input, &i, info);
 			if (!segment)
-				return (free_tokens(head)); // Return NULL after freeing tokens
-			head = join_word_segment(segment, head, &current_word_token);
+				return (free_tokens(head));
+			// Pass TOKEN_DQUOTE for double-quoted segments
+			head = join_word_segment(segment, head, &current_word_token, TOKEN_DQUOTE);
 		}
 		else if (input[i] == '$') // Variable
 		{
@@ -305,13 +302,14 @@ t_token *tokenize_input(char *input, t_info *info)
 		else // Regular word character
 		{
 			segment = extract_word_segment(input, &i);
-			if (segment) // Only process if we got something
-				head = join_word_segment(segment, head, &current_word_token);
+			if (segment)
+				// Default to TOKEN_WORD for unquoted text
+				head = join_word_segment(segment, head, &current_word_token, TOKEN_WORD);
 		}
 		if (!head)
-			return (NULL);  // If error occurred, return NULL
+			return (NULL);
 	}
-	return (head);  // Return the list of tokens
+	return (head);
 }
 
 int main(int ac, char **av, char **env)

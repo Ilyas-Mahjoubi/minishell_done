@@ -6,7 +6,7 @@
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/21 18:09:42 by ilmahjou          #+#    #+#             */
-/*   Updated: 2025/05/13 22:04:30 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/15 19:46:22 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ t_token	*add_double_quote_text(char *input, int start, int end, t_token *head, t
 t_token	*process_double_quotes(char *input, int *i, t_token *head, t_token *current, t_info *info);
 t_token	*handle_quotes(char *input, int *i, t_token *head, t_token *current, t_info *info);
 int		validate_syntax(t_token *tokens);
-t_token *join_word_segment(char *segment, t_token *head, t_token **current_word_token);
+t_token *join_word_segment(char *segment, t_token *head, t_token **current_word_token, t_token_type type);
 char *token_type_to_string(t_token_type token_type);
 ////try//
 t_token *expand_and_tokenize_var(char *var_value, t_info *info);
@@ -151,7 +151,6 @@ char *extract_single_quote_content(char *input, int *i);
 char *extract_word_segment(char *input, int *i);
 char *extract_double_quote_content(char *input, int *i, t_info *info);
 t_token	*handle_pipe(int *i, t_token *head, t_token *current);
-
-
+void	debug_tokens(t_token *token);
 
 #endif

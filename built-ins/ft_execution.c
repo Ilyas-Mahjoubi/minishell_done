@@ -6,7 +6,7 @@
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 18:29:40 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/15 16:53:48 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/15 20:43:04 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,8 @@ int	istt_builtin(char ***matrix, t_info *info)
 		mat = 0;
 		while(is_redirection(matrix[mat]))
 		{
-			ft_redirections(info->exec[mat], info);
+			if (ft_redirections(info->exec[mat], info) == -1)
+				return (-2);
 			mat++;
 		}
 		if (ft_strcmp(matrix[mat][0], "cd") == 0)
@@ -231,13 +232,16 @@ void	ft_execution(t_info *info)
 		{
 			while(info->exec[mat])
 			{
-				ft_redirections(info->exec[mat], info);
+				if (ft_redirections(info->exec[mat], info) == -1)
+					break;
 				mat++;
 			}
 			break;
 		}
 		if (count == 1)
 		{
+			if (istt_builtin(info->exec, info) == -2)
+				break;
 			if (istt_builtin(info->exec, info) != -1)
 			{
 				ft_refresh_fd(info);
@@ -278,7 +282,7 @@ void	ft_execution(t_info *info)
 			while (is_redirection(info->exec[mat]))
 			{
 				if (ft_redirections(info->exec[mat], info) == -1)
-					exit(1);
+					exit(exit_status);
 				mat++;
 			}
 			if (!info->exec[mat])

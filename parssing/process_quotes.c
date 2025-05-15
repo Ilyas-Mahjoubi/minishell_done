@@ -6,7 +6,7 @@
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 17:37:18 by ilmahjou          #+#    #+#             */
-/*   Updated: 2025/05/12 18:24:25 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/15 19:49:06 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ t_token *process_double_quotes(char *input, int *i, t_token *head, t_token *curr
 				if (!segment)
 					return (free_tokens(head));
 
-				head = join_word_segment(segment, head, &current_word_token);
+				head = join_word_segment(segment, head, &current_word_token, TOKEN_DQUOTE);
 				if (!head)
 					return (NULL);
 			}
@@ -113,7 +113,7 @@ t_token *process_double_quotes(char *input, int *i, t_token *head, t_token *curr
 		if (!segment)
 			return (free_tokens(head));
 
-		head = join_word_segment(segment, head, &current_word_token);
+		head = join_word_segment(segment, head, &current_word_token, TOKEN_DQUOTE);
 		if (!head)
 			return (NULL);
 	}

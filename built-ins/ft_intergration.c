@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_intergration.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 20:19:42 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/13 21:14:11 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/15 20:03:24 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,18 +83,19 @@ void	save_command(t_info *info, t_token **token)
 		if ((*token)->type != 2 && (*token)->type != 4
 			&& (*token)->type != 3 && (*token)->type != 7)
 		{
-			// if ((*token)->type == 5)
-			// 	matrix[j] = ft_strjoin(";", (*token)->content);
-			// else if ((*token)->type == 6)
-			// 	matrix[j] = ft_strjoin(":", (*token)->content);
+			if (((*token)->type == 5 || (*token)->type == 6) && ((ft_strcmp((*token)->content, "<") == 0
+			|| ft_strcmp((*token)->content, ">") == 0
+			|| ft_strcmp((*token)->content, ">>") == 0
+			|| ft_strcmp((*token)->content, "<<") == 0)))
+				matrix[j] = ft_strjoin(";", (*token)->content);
 			// else if ((*token)->type == 8)
 			// {
 			// 	matrix[j] = ft_strdup("$");
 			// 	j++;
 			// 	matrix[j] = ft_strdup((*token)->content);
 			// }
-			// else
-			matrix[j] = ft_strdup((*token)->content);
+			else
+				matrix[j] = ft_strdup((*token)->content);
 			j++;
 			(*token) = (*token)->next;
 		}

@@ -6,7 +6,7 @@
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/21 19:55:30 by ilmahjou          #+#    #+#             */
-/*   Updated: 2025/05/15 16:26:41 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/15 21:50:58 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ t_token *expand_and_tokenize_var(char *var_value, t_info *info)
 	return expanded_tokens;
 }
 
-t_token *tokenize_string(char *str, t_info *info)
+/* t_token *tokenize_string(char *str, t_info *info)
 {
 	t_token *head = NULL;
 	t_token *current_word_token = NULL;
@@ -116,313 +116,110 @@ t_token *tokenize_string(char *str, t_info *info)
 			return (NULL);
 	}
 	return (head);
-}
-
-/* t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **current_word_token, t_info *info)
-{
-	int		start;
-	char	*var_name;
-	char	*var_value;
-
-	(*i)++; // Skip the $
-
-	// Handle special case for $? (last exit status)
-	if (input[*i] == '?')
-	{
-		(*i)++; // Skip the '?'
-
-		// Use mdollar function to get exit status
-		var_name = ft_strdup("?");
-		if (!var_name)
-			return free_tokens(head);
-
-		var_value = mdollar(var_name, info);
-
-		free(var_name);
-
-		if (!var_value)
-			var_value = ft_strdup(""); // Empty string if not found
-
-		if (!var_value)
-			return free_tokens(head);
-
-		head = join_word_segment(var_value, head, current_word_token);
-		return head;
-	}
-	// Handle regular environment variables
-	start = *i;
-	while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
-		(*i)++;
-
-	if (*i == start)
-		return head; // No valid variable name after $
-
-	var_name = ft_substr(input, start, *i - start);
-	if (!var_name)
-		return free_tokens(head);
-
-	// Use mdollar function for variable expansion
-	var_value = mdollar(var_name, info);
-	free(var_name);
-
-	if (!var_value)
-		var_value = ft_strdup(""); // Expand to empty if not found
-
-	if (!var_value)
-		return free_tokens(head);
-
-	head = join_word_segment(var_value, head, current_word_token);
-	return head;
 } */
 
-/* t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **current_word_token, t_info *info)
+t_token *tokenize_string(char *str, t_info *info)
 {
-    int     start;
-    char    *var_name;
-    char    *var_value;
-    t_token *expanded_tokens = NULL;
-    t_token *last_token;
+	t_token *head = NULL;
+	t_token *current_word_token = NULL;
+	int     i = 0;
+	char    *segment = NULL;
 
-    (*i)++; // Skip the $
-
-    // Handle special case for $? (last exit status)
-    if (input[*i] == '?')
-    {
-        (*i)++; // Skip the '?'
-        var_name = ft_strdup("?");
-        if (!var_name)
-            return free_tokens(head);
-        var_value = mdollar(var_name, info);
-        free(var_name);
-        if (!var_value)
-            var_value = ft_strdup("");
-        if (!var_value)
-            return free_tokens(head);
-        // For $?, we don't tokenize the result, just join it as a word segment
-        head = join_word_segment(var_value, head, current_word_token);
-        return head;
-    }
-
-    // Handle regular environment variables
-    start = *i;
-    while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
-        (*i)++;
-
-    if (*i == start)
-        return head; // No valid variable name after $
-
-    var_name = ft_substr(input, start, *i - start);
-    if (!var_name)
-        return free_tokens(head);
-
-    // Get variable value
-    var_value = mdollar(var_name, info);
-    free(var_name);
-
-    // Check if we are in a quote context
-    int in_quotes = 0;
-    int j = 0;
-    while (j < *i)
-    {
-        if (input[j] == '"' || input[j] == '\'')
-            in_quotes = !in_quotes;
-        j++;
-    }
-
-    // If in quotes or no value, just add as a word segment
-    if (in_quotes || !var_value || !*var_value)
-    {
-        if (!var_value)
-            var_value = ft_strdup("");
-
-        if (!var_value)
-            return free_tokens(head);
-
-        head = join_word_segment(var_value, head, current_word_token);
-        return head;
-    }
-
-    // If we're not in quotes, and the current word token is empty,
-    // we can tokenize the expanded value
-    if (*current_word_token == NULL)
-    {
-        // Tokenize the variable value
-        expanded_tokens = expand_and_tokenize_var(var_value, info);
-        free(var_value);
-
-        // If tokenization failed or produced no tokens
-        if (!expanded_tokens)
-            return head;
-
-        // Append the expanded tokens to the token list
-        if (!head)
-            head = expanded_tokens;
-        else
-        {
-            last_token = get_last_token(head);
-            last_token->next = expanded_tokens;
-        }
-    }
-    else
-    {
-        // If we're already building a word, just append the value
-        head = join_word_segment(var_value, head, current_word_token);
-    }
-
-    return head;
-} */
-
-/* t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **current_word_token, t_info *info)
-{
-	int	start;
-	char	*var_name;
-	char	*var_value;
-	t_token	*expanded_tokens = NULL;
-	t_token	*last_token;
-
-	(*i)++;
-	if (input[*i] == '?')
+	while (str[i])
 	{
-		(*i)++; // Skip the '?'
-		var_name = ft_strdup("?");
-		if (!var_name)
-			return free_tokens(head);
-		var_value = mdollar(var_name, info);
-		free(var_name);
-		if (!var_value)
-			var_value = ft_strdup("");
-		if (!var_value)
-			return free_tokens(head);
-		// For $?, we don't tokenize the result, just join it as a word segment
-		head = join_word_segment(var_value, head, current_word_token);
-		return head;
-	}
-
-	// Handle regular environment variables
-	start = *i;
-	while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
-		(*i)++;
-
-	if (*i == start)
-		return head; // No valid variable name after $
-
-	var_name = ft_substr(input, start, *i - start);
-	if (!var_name)
-		return free_tokens(head);
-
-	// Get variable value
-	var_value = mdollar(var_name, info);
-	free(var_name);
-
-	// Check if we are in a quote context
-	int in_quotes = 0;
-	int j = 0;
-	while (j < *i)
-	{
-		if (input[j] == '"' || input[j] == '\'')
-			in_quotes = !in_quotes;
-		j++;
-	}
-
-	// If in quotes or no value, just add as a word segment
-	if (in_quotes || !var_value || !*var_value)
-	{
-		if (!var_value)
-			var_value = ft_strdup("");
-
-		if (!var_value)
-			return free_tokens(head);
-
-		head = join_word_segment(var_value, head, current_word_token);
-		return head;
-	}
-
-	// If we're not in quotes, and the current word token is empty,
-	// we can tokenize the expanded value
-	if (*current_word_token == NULL)
-	{
-		// Tokenize the variable value
-		expanded_tokens = expand_and_tokenize_var(var_value, info);
-		free(var_value);
-
-		// If tokenization failed or produced no tokens
-		if (!expanded_tokens)
-			return head;
-
-		// Append the expanded tokens to the token list
-		if (!head)
-			head = expanded_tokens;
+		if (str[i] == ' ' || str[i] == '\t')
+		{
+			current_word_token = NULL;
+			i++;
+		}
+		else if (str[i] == '|')
+		{
+			current_word_token = NULL;
+			head = handle_pipe(&i, head, get_last_token(head));
+		}
+		else if (str[i] == '<' || str[i] == '>')
+		{
+			current_word_token = NULL;
+			head = handle_redirection(str, &i, head, get_last_token(head));
+		}
+		else if (str[i] == '\'')
+		{
+			segment = extract_single_quote_content(str, &i);
+			if (!segment)
+				return (free_tokens(head));
+			// Pass TOKEN_SQUOTE for single-quoted segments
+			head = join_word_segment(segment, head, &current_word_token, TOKEN_SQUOTE);
+		}
+		else if (str[i] == '"')
+		{
+			segment = extract_double_quote_content(str, &i, info);
+			if (!segment)
+				return (free_tokens(head));
+			// Pass TOKEN_DQUOTE for double-quoted segments
+			head = join_word_segment(segment, head, &current_word_token, TOKEN_DQUOTE);
+		}
+		else if (str[i] == '$')
+		{
+			head = handle_env_variable(str, &i, head, &current_word_token, info);
+		}
 		else
 		{
-			last_token = get_last_token(head);
-			last_token->next = expanded_tokens;
+			segment = extract_word_segment(str, &i);
+			if (segment)
+				// Default to TOKEN_WORD for unquoted text
+				head = join_word_segment(segment, head, &current_word_token, TOKEN_WORD);
 		}
+		if (!head)
+			return (NULL);
 	}
-	else
-	{
-		// If we're already building a word, just append the value
-		head = join_word_segment(var_value, head, current_word_token);
-	}
+	return (head);
+}
 
-	return head;
-} */
-
-t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **current_word_token, t_info *info)
+t_token *handle_env_variable(char *input, int *i, t_token *head,
+                           t_token **current_word_token, t_info *info)
 {
-	int     start;
-	char    *var_name;
-	char    *var_value;
+	int start;
+	char *var_name;
+	char *var_value;
 	t_token *expanded_tokens = NULL;
 	t_token *last_token;
-
-	// Store the original position of the $
 	int dollar_pos = *i;
+	t_token_type current_type = (*current_word_token) ? (*current_word_token)->type : TOKEN_WORD;
 
-	(*i)++; // Skip the '$'
+	(*i)++; // Skip '$'
 
-	// Check for $? special case
+	// Handle $? special case
 	if (input[*i] == '?')
 	{
-		(*i)++; // Skip the '?'
-		var_name = ft_strdup("?");
-		if (!var_name)
-			return free_tokens(head);
-		var_value = mdollar(var_name, info);
-		free(var_name);
+		(*i)++;
+		var_value = mdollar("?", info);
 		if (!var_value)
 			var_value = ft_strdup("");
 		if (!var_value)
 			return free_tokens(head);
-		// For $?, we don't tokenize the result, just join it as a word segment
-		head = join_word_segment(var_value, head, current_word_token);
+
+		head = join_word_segment(var_value, head, current_word_token, current_type);
+		free(var_value);
 		return head;
 	}
 
-	// Check if the character after $ is a valid variable name starter
-	// (letter or underscore, according to POSIX)
+	// Check for valid variable name
 	if (!input[*i] || !(ft_isalpha(input[*i]) || input[*i] == '_'))
 	{
-		// Not a valid variable name, treat $ as a literal character
-		// Reset the position to where the $ was
-		*i = dollar_pos;
-
-		// Create a segment with just the $ character
+		*i = dollar_pos; // Rewind to $
 		char *dollar_str = ft_strdup("$");
 		if (!dollar_str)
 			return free_tokens(head);
 
-		head = join_word_segment(dollar_str, head, current_word_token);
-		(*i)++; // Skip the $ since we've handled it
+		head = join_word_segment(dollar_str, head, current_word_token, current_type);
+		(*i)++;
 		return head;
 	}
 
-	// Handle regular environment variables
+	// Extract variable name
 	start = *i;
 	while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
 		(*i)++;
-
-	if (*i == start) // This should not happen now given our checks above
-		return head;
 
 	var_name = ft_substr(input, start, *i - start);
 	if (!var_name)
@@ -432,56 +229,43 @@ t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **curre
 	var_value = mdollar(var_name, info);
 	free(var_name);
 
-	// Check if we are in a quote context
+	// Check quote context
 	int in_quotes = 0;
-	int j = 0;
-	while (j < dollar_pos)
-	{
+	for (int j = 0; j < dollar_pos; j++)
 		if (input[j] == '"' || input[j] == '\'')
 			in_quotes = !in_quotes;
-		j++;
-	}
 
-	// If in quotes or no value, just add as a word segment
-	if (in_quotes || !var_value || !*var_value)
+	// Handle empty/unset variables
+	if (!var_value || !*var_value)
 	{
-		if (!var_value)
-			var_value = ft_strdup("");
-
+		var_value = ft_strdup("");
 		if (!var_value)
 			return free_tokens(head);
+	}
 
-		head = join_word_segment(var_value, head, current_word_token);
+	// In quotes or building existing word: join as segment
+	if (in_quotes || *current_word_token)
+	{
+		head = join_word_segment(var_value, head, current_word_token,
+								in_quotes ? TOKEN_DQUOTE : current_type);
+		free(var_value);
 		return head;
 	}
 
-	// If we're not in quotes, and the current word token is empty,
-	// we can tokenize the expanded value
-	if (*current_word_token == NULL)
-	{
-		// Tokenize the variable value
-		expanded_tokens = expand_and_tokenize_var(var_value, info);
-		free(var_value);
+	// Not in quotes and new word: tokenize the expansion
+	expanded_tokens = expand_and_tokenize_var(var_value, info);
+	free(var_value);
 
-		// If tokenization failed or produced no tokens
-		if (!expanded_tokens)
-			return head;
+	if (!expanded_tokens)
+		return head;
 
-		// Append the expanded tokens to the token list
-		if (!head)
-			head = expanded_tokens;
-		else
-		{
-			last_token = get_last_token(head);
-			last_token->next = expanded_tokens;
-		}
-	}
+	if (!head)
+		head = expanded_tokens;
 	else
 	{
-		// If we're already building a word, just append the value
-		head = join_word_segment(var_value, head, current_word_token);
+		last_token = get_last_token(head);
+		last_token->next = expanded_tokens;
 	}
-
 	return head;
 }
 
