@@ -6,7 +6,7 @@
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 18:29:40 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/13 22:04:02 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/15 16:53:48 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,7 +189,7 @@ int	count_exec_blocks(char ***exec)
 				count++;
 			has_cmd_or_redir = 0;
 		}
-		else if (ft_isalpha(exec[i][0][0]) || is_redirection(exec[i]))
+		else if (ft_isalpha(exec[i][0][0]) || ft_isascii(exec[i][0][0]) || is_redirection(exec[i]))
 		{
 			has_cmd_or_redir = 1;
 		}

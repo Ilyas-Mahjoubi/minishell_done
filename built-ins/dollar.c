@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   dollar.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tkurukul <tkurukul@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 16:47:35 by tkurukul          #+#    #+#             */
-/*   Updated: 2025/05/12 18:32:34 by tkurukul         ###   ########.fr       */
+/*   Updated: 2025/05/15 16:52:35 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ char	*mdollar(char *str, t_info *info)
 	i = 0;
 	if (str[0] == '?')
 		return (ft_itoa(exit_status));
+	else if (str[0] >= '0' && str[0] <= '9')
+		return(ft_strdup(str + 1));
 	while(info->env[i])
 	{
 		if (ft_strncmp(info->env[i], str, len) == 0)

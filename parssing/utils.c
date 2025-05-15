@@ -6,7 +6,7 @@
 /*   By: ilmahjou <ilmahjou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/21 19:55:30 by ilmahjou          #+#    #+#             */
-/*   Updated: 2025/05/13 18:33:55 by ilmahjou         ###   ########.fr       */
+/*   Updated: 2025/05/15 16:26:41 by ilmahjou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,7 +272,7 @@ t_token *tokenize_string(char *str, t_info *info)
     return head;
 } */
 
-t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **current_word_token, t_info *info)
+/* t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **current_word_token, t_info *info)
 {
 	int	start;
 	char	*var_name;
@@ -318,6 +318,124 @@ t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **curre
 	int in_quotes = 0;
 	int j = 0;
 	while (j < *i)
+	{
+		if (input[j] == '"' || input[j] == '\'')
+			in_quotes = !in_quotes;
+		j++;
+	}
+
+	// If in quotes or no value, just add as a word segment
+	if (in_quotes || !var_value || !*var_value)
+	{
+		if (!var_value)
+			var_value = ft_strdup("");
+
+		if (!var_value)
+			return free_tokens(head);
+
+		head = join_word_segment(var_value, head, current_word_token);
+		return head;
+	}
+
+	// If we're not in quotes, and the current word token is empty,
+	// we can tokenize the expanded value
+	if (*current_word_token == NULL)
+	{
+		// Tokenize the variable value
+		expanded_tokens = expand_and_tokenize_var(var_value, info);
+		free(var_value);
+
+		// If tokenization failed or produced no tokens
+		if (!expanded_tokens)
+			return head;
+
+		// Append the expanded tokens to the token list
+		if (!head)
+			head = expanded_tokens;
+		else
+		{
+			last_token = get_last_token(head);
+			last_token->next = expanded_tokens;
+		}
+	}
+	else
+	{
+		// If we're already building a word, just append the value
+		head = join_word_segment(var_value, head, current_word_token);
+	}
+
+	return head;
+} */
+
+t_token *handle_env_variable(char *input, int *i, t_token *head, t_token **current_word_token, t_info *info)
+{
+	int     start;
+	char    *var_name;
+	char    *var_value;
+	t_token *expanded_tokens = NULL;
+	t_token *last_token;
+
+	// Store the original position of the $
+	int dollar_pos = *i;
+
+	(*i)++; // Skip the '$'
+
+	// Check for $? special case
+	if (input[*i] == '?')
+	{
+		(*i)++; // Skip the '?'
+		var_name = ft_strdup("?");
+		if (!var_name)
+			return free_tokens(head);
+		var_value = mdollar(var_name, info);
+		free(var_name);
+		if (!var_value)
+			var_value = ft_strdup("");
+		if (!var_value)
+			return free_tokens(head);
+		// For $?, we don't tokenize the result, just join it as a word segment
+		head = join_word_segment(var_value, head, current_word_token);
+		return head;
+	}
+
+	// Check if the character after $ is a valid variable name starter
+	// (letter or underscore, according to POSIX)
+	if (!input[*i] || !(ft_isalpha(input[*i]) || input[*i] == '_'))
+	{
+		// Not a valid variable name, treat $ as a literal character
+		// Reset the position to where the $ was
+		*i = dollar_pos;
+
+		// Create a segment with just the $ character
+		char *dollar_str = ft_strdup("$");
+		if (!dollar_str)
+			return free_tokens(head);
+
+		head = join_word_segment(dollar_str, head, current_word_token);
+		(*i)++; // Skip the $ since we've handled it
+		return head;
+	}
+
+	// Handle regular environment variables
+	start = *i;
+	while (input[*i] && (ft_isalnum(input[*i]) || input[*i] == '_'))
+		(*i)++;
+
+	if (*i == start) // This should not happen now given our checks above
+		return head;
+
+	var_name = ft_substr(input, start, *i - start);
+	if (!var_name)
+		return free_tokens(head);
+
+	// Get variable value
+	var_value = mdollar(var_name, info);
+	free(var_name);
+
+	// Check if we are in a quote context
+	int in_quotes = 0;
+	int j = 0;
+	while (j < dollar_pos)
 	{
 		if (input[j] == '"' || input[j] == '\'')
 			in_quotes = !in_quotes;
